@@ -65,16 +65,18 @@
 	font-weight: var(--font-semibold);
 }
 
+/* --text-faint is reserved for fog: grey means fogged and nothing else. */
+
 .qb-chip {
 	flex: none;
-	color: var(--text-faint);
+	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
 
 .qb-chip-fog {
-	color: var(--text-muted);
+	color: var(--text-faint);
 }
 
 .qb-muted,
@@ -129,7 +131,7 @@
 }
 
 .qb-card-note {
-	color: var(--text-faint);
+	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	text-align: right;
 }
@@ -210,7 +212,7 @@
 }
 
 .qb-tone-muted {
-	color: var(--text-faint);
+	color: var(--text-muted);
 }
 
 .qb-fog {

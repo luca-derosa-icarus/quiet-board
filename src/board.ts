@@ -96,7 +96,7 @@ function tone(v: unknown): Tone {
 export function parseBoard(text: string): ParseResult {
 	let raw: unknown;
 	try {
-		raw = JSON.parse(text);
+		raw = JSON.parse(text.charCodeAt(0) === 0xfeff ? text.slice(1) : text);
 	} catch (e) {
 		return { ok: false, reason: "json", message: e instanceof Error ? e.message : String(e) };
 	}
@@ -171,7 +171,8 @@ function normalizeBlock(b: unknown, index: number): Block {
 	}
 	const points: [number, number][] = [];
 	if (Array.isArray(b.points)) {
-		for (const p of b.points) {
+		// Keep only the newest MAX_POINTS entries (the file lists oldest first).
+		for (const p of b.points.slice(-MAX_POINTS)) {
 			if (!Array.isArray(p) || p.length < 2) continue;
 			const t = typeof p[0] === "string" ? parseIsoTime(p[0]) : NaN;
 			const v = p[1];
@@ -181,13 +182,27 @@ function normalizeBlock(b: unknown, index: number): Block {
 	return { ...base, kind, value: str(b.value) ?? "", delta: str(b.delta), tone: tone(b.tone), points };
 }
 
+/** Spark points kept per block; older ones are dropped. */
+export const MAX_POINTS = 500;
+
+/** A stamp more than this far in the future is treated as unreadable (fogged). */
+export const FUTURE_SLACK_MS = 60 * 60 * 1000;
+
 const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
 // ISO datetime with an explicit zone (Z or +hh:mm). A datetime with no zone is
 // rejected rather than guessed, because the spec says ISO UTC.
-const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
+const ISO_TIME = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
+
+/** True when y-m-d is a real calendar day (no roll-over: 2026-02-30 is false). */
+function realDate(y: number, m: number, d: number): boolean {
+	const t = new Date(Date.UTC(y, m - 1, d));
+	return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+}
 
 function parseIsoTime(s: string): number {
-	return ISO_TIME.test(s) ? Date.parse(s) : NaN;
+	const m = ISO_TIME.exec(s);
+	if (!m || !realDate(Number(m[1]), Number(m[2]), Number(m[3]))) return NaN;
+	return Date.parse(s);
 }
 
 export function isValidTimeZone(tz: string): boolean {
@@ -222,10 +237,21 @@ export function tzOffsetMs(ms: number, tz: string | undefined): number {
  * Returns NaN when the string is neither form.
  */
 export function asOfToMs(s: string, tz: string | undefined): number {
+	return stampMs(s, tz, true);
+}
+
+/**
+ * Epoch ms of a stamp. A `YYYY-MM-DD` date resolves to 23:59:59 of that day
+ * in `tz` when `endOfDay`, otherwise to 00:00:00 (its start, used to decide
+ * whether the stamp lies in the future).
+ */
+function stampMs(s: string, tz: string | undefined, endOfDay: boolean): number {
 	const m = DATE_ONLY.exec(s);
 	if (!m) return parseIsoTime(s);
-	const wall = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59);
-	if (Number.isNaN(wall)) return NaN;
+	if (!realDate(Number(m[1]), Number(m[2]), Number(m[3]))) return NaN;
+	const wall = endOfDay
+		? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59)
+		: Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0);
 	// Two passes settle the offset across a DST change.
 	let guess = wall - tzOffsetMs(wall, tz);
 	guess = wall - tzOffsetMs(guess, tz);
@@ -233,15 +259,19 @@ export function asOfToMs(s: string, tz: string | undefined): number {
 }
 
 export interface Freshness {
-	/** Age in ms (0 when as_of is in the future); null when as_of is unreadable. */
+	/**
+	 * Age in ms (0 when as_of is up to an hour in the future); null when as_of
+	 * is unreadable or more than an hour in the future.
+	 */
 	ageMs: number | null;
 	stale: boolean;
 }
 
 /**
  * Freshness of an item inside a block. The item's own `as_of` and
- * `stale_after` win over the block's, field by field. `forceFog` (used after
- * a failed read) fogs everything.
+ * `stale_after` win over the block's, field by field. A stamp more than
+ * FUTURE_SLACK_MS ahead of now is fogged like an unreadable one. `forceFog`
+ * (used after a failed read) fogs everything.
  */
 export function freshness(
 	item: Stamp | undefined,
@@ -254,6 +284,9 @@ export function freshness(
 	const staleAfter = item?.stale_after ?? block.stale_after;
 	const ms = asOf === undefined ? NaN : asOfToMs(asOf, tz);
 	if (Number.isNaN(ms)) return { ageMs: null, stale: true };
+	// Future check from the start of a date-only stamp's day, so today's date
+	// is never "in the future" at noon.
+	if (stampMs(asOf as string, tz, false) - nowMs > FUTURE_SLACK_MS) return { ageMs: null, stale: true };
 	const ageMs = Math.max(0, nowMs - ms);
 	const stale = forceFog || (staleAfter !== undefined && ageMs > staleAfter * 1000);
 	return { ageMs, stale };
@@ -289,7 +322,36 @@ export function formatClock(ms: number, tz: string | undefined, nowMs: number): 
 	return day(ms) === day(nowMs) ? clock : `${day(ms)} ${clock}`;
 }
 
-/** Whether the board as a whole is past its top-level stale_after. */
+/** Whether written_at is more than FUTURE_SLACK_MS ahead of now (a wrong clock). */
+export function boardFromFuture(board: Board, nowMs: number): boolean {
+	return board.writtenMs - nowMs > FUTURE_SLACK_MS;
+}
+
+/** Whether the board as a whole is stale: past its stale_after, or stamped in the future. */
 export function boardStale(board: Board, nowMs: number): boolean {
+	if (boardFromFuture(board, nowMs)) return true;
 	return board.stale_after !== undefined && nowMs - board.writtenMs > board.stale_after * 1000;
+}
+
+/**
+ * Time and value range of spark points. A loop, not Math.min(...arr):
+ * spreading a huge array throws RangeError (call stack overflow).
+ */
+export function sparkBounds(points: [number, number][]): { t0: number; t1: number; v0: number; v1: number } {
+	let t0 = Infinity;
+	let t1 = -Infinity;
+	let v0 = Infinity;
+	let v1 = -Infinity;
+	for (const [t, v] of points) {
+		if (t < t0) t0 = t;
+		if (t > t1) t1 = t;
+		if (v < v0) v0 = v;
+		if (v > v1) v1 = v;
+	}
+	return { t0, t1, v0, v1 };
+}
+
+/** CSS class for a block id: `qb-block-id-<id>`, lower-cased, anything outside [a-z0-9-] becomes `-`. */
+export function blockIdClass(id: string): string {
+	return `qb-block-id-${id.toLowerCase().replace(/[^a-z0-9-]/g, "-")}`;
 }

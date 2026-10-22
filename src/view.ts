@@ -7,12 +7,15 @@ import {
 	LinesBlock,
 	SparkBlock,
 	Tone,
+	blockIdClass,
+	boardFromFuture,
 	boardStale,
 	chipText,
 	formatAge,
 	formatClock,
 	freshness,
 	parseBoard,
+	sparkBounds,
 } from "./board";
 
 export const VIEW_TYPE_BOARD = "quiet-board-view";
@@ -124,16 +127,17 @@ export class BoardView extends FileView {
 
 		const forceFog = this.error !== null;
 		const stale = boardStale(board, now);
+		const future = boardFromFuture(board, now);
 		const body = root.createDiv({ cls: stale ? "qb-body qb-dimmed" : "qb-body" });
 
 		const header = body.createDiv({ cls: "qb-header" });
 		header.createEl("h2", { cls: "qb-title", text: board.title || this.getDisplayText() });
 		const written = formatClock(board.writtenMs, board.tz, now);
-		header.createDiv({
-			cls: "qb-written",
-			text: `written ${written} · ${formatAge(Math.max(0, now - board.writtenMs))} ago`,
-		});
-		if (stale) {
+		const when = future ? "in the future" : `${formatAge(Math.max(0, now - board.writtenMs))} ago`;
+		header.createDiv({ cls: "qb-written", text: `written ${written} · ${when}` });
+		if (future) {
+			body.createDiv({ cls: "qb-stale-note", text: "This board is stamped in the future; the writer's clock may be wrong." });
+		} else if (stale) {
 			body.createDiv({ cls: "qb-stale-note", text: "This board is older than its stale_after; its writer may have stopped." });
 		}
 
@@ -144,7 +148,7 @@ export class BoardView extends FileView {
 	}
 
 	private drawBlock(parent: HTMLElement, block: Block, board: Board, now: number, forceFog: boolean): void {
-		const section = parent.createDiv({ cls: `qb-block qb-block-${block.kind}` });
+		const section = parent.createDiv({ cls: `qb-block qb-block-${block.kind} ${blockIdClass(block.id)}` });
 		const head = section.createDiv({ cls: "qb-block-head" });
 		head.createDiv({ cls: "qb-block-title", text: block.title || block.id });
 
@@ -221,18 +225,14 @@ function drawSparkline(parent: HTMLElement, points: [number, number][], fogged: 
 		parent.createDiv({ cls: "qb-muted", text: "No points." });
 		return;
 	}
-	const ts = points.map((p) => p[0]);
-	const vs = points.map((p) => p[1]);
-	const t0 = Math.min(...ts);
-	const t1 = Math.max(...ts);
-	const v0 = Math.min(...vs);
-	const v1 = Math.max(...vs);
+	const { t0, t1, v0, v1 } = sparkBounds(points);
+	const vs0 = points[0][1];
 	const x = (t: number) => (t1 === t0 ? SPARK_W : ((t - t0) / (t1 - t0)) * SPARK_W);
 	const y = (v: number) =>
 		v1 === v0 ? SPARK_H / 2 : SPARK_PAD + (1 - (v - v0) / (v1 - v0)) * (SPARK_H - 2 * SPARK_PAD);
 	const coords =
 		points.length === 1
-			? `0,${y(vs[0])} ${SPARK_W},${y(vs[0])}`
+			? `0,${y(vs0)} ${SPARK_W},${y(vs0)}`
 			: points.map((p) => `${x(p[0]).toFixed(2)},${y(p[1]).toFixed(2)}`).join(" ");
 
 	const svg = parent.createSvg("svg", {

@@ -64,15 +64,26 @@ A `.board` file is UTF-8 JSON. Write it atomically (write a temporary file, then
 
 - `cards`: `items` of `{label, value, note?, delta?, as_of?, stale_after?, tone?}`.
 - `lines`: `items` of `{text, tone?, as_of?, stale_after?}`, plus optional `empty`, the text shown when `items` is empty.
-- `spark`: `points` (array of `[ISO time, number]`, oldest first, up to about 60), `value`, `delta?`, `tone?`.
+- `spark`: `points` (array of `[ISO time, number]`, oldest first, up to about 60), `value`, `delta?`, `tone?`. Only the newest 500 points are kept; the rest are ignored.
 
 ### Tone and freshness
 
 - `tone` is `neutral` (default), `up`, `down`, `warn` or `muted`. On a card or spark with a `delta`, the tone colours the delta; without a delta it colours the value. On a line it colours the text. An unknown tone is treated as `neutral`.
+- Grey means fogged and nothing else. Fog alone uses Obsidian's faint text colour; `muted`, notes, labels and fresh age chips use the muted text colour, which stays readable and never looks fogged.
 - An item's own `as_of` and `stale_after` win over its block's, field by field.
-- A `YYYY-MM-DD` date counts as 23:59:59 of that day in `tz`.
+- A `YYYY-MM-DD` date counts as 23:59:59 of that day in `tz`. An impossible date (`2026-02-30`, `2026-13-45`), in a date or a datetime, is unreadable.
 - Ages read `45 m` under an hour, `3 h` under two days, and `12 d` beyond.
 - A stale or unreadable stamp fogs the item: grey, no tone, chip `unknown · <age>` (or just `unknown` when the stamp can't be read).
+- A stamp more than an hour in the future (for a date, its day starting more than an hour from now) is fogged with the chip `unknown`. A board whose `written_at` is more than an hour in the future is drawn as stale, with a note that the writer's clock may be wrong.
+- A leading UTF-8 byte-order mark is ignored.
+
+### Styling one block
+
+Each block's element carries the class `qb-block-id-<id>`, with the id lower-cased and every character outside `a-z`, `0-9` and `-` turned into `-`. A CSS snippet in your vault can restyle one block without a format change:
+
+```css
+.qb-block-id-news .qb-line-text { font-size: var(--font-ui-small); }
+```
 
 ## Build
 
@@ -91,6 +102,11 @@ npm run install-vault -- /path/to/your/vault
 ```
 
 This copies `main.js`, `manifest.json` and `styles.css` into `<vault>/.obsidian/plugins/quiet-board/`. It does not enable the plugin: turn it on yourself in **Settings → Community plugins**.
+
+## Versions
+
+- The plugin version (in `manifest.json`, `package.json` and `versions.json`) gets a patch bump on every build that is committed. It stays at 0.1.0 until the first release.
+- The file format stays `quiet-board/1` when it gains a new optional field. Only a breaking change becomes `quiet-board/2`.
 
 ## Licence
 
