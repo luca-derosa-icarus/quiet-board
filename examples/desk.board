@@ -1,0 +1,51 @@
+{
+  "spec": "quiet-board/1",
+  "title": "Example desk",
+  "written_at": "2026-01-15T17:12:00Z",
+  "stale_after": 172800,
+  "tz": "Europe/Rome",
+  "blocks": [
+    {
+      "id": "balances", "kind": "cards", "title": "Balances",
+      "as_of": "2026-01-15T17:12:00Z", "stale_after": 604800,
+      "items": [
+        {"label": "Total", "value": "EUR 12,345.67", "note": "all accounts", "as_of": "2026-01-14", "stale_after": 2592000},
+        {"label": "Available", "value": "EUR 2,500.00", "delta": "-80.00 due by 01-31", "tone": "down"},
+        {"label": "Savings", "value": "EUR 6,000.00", "delta": "+150.00 this month", "tone": "up"},
+        {"label": "Old estimate", "value": "EUR 900.00", "as_of": "2025-11-01", "stale_after": 86400, "tone": "up"}
+      ]
+    },
+    {
+      "id": "trend", "kind": "spark", "title": "Portfolio value",
+      "as_of": "2026-01-15T17:00:00Z", "stale_after": 604800,
+      "value": "EUR 5,432.10", "delta": "+21.40 vs last pull", "tone": "up",
+      "points": [
+        ["2025-12-16T17:00:00Z", 5310.0], ["2025-12-19T17:00:00Z", 5290.5],
+        ["2025-12-23T17:00:00Z", 5335.2], ["2025-12-30T17:00:00Z", 5372.8],
+        ["2026-01-02T17:00:00Z", 5350.1], ["2026-01-06T17:00:00Z", 5388.9],
+        ["2026-01-09T17:00:00Z", 5401.3], ["2026-01-13T17:00:00Z", 5410.7],
+        ["2026-01-15T17:00:00Z", 5432.1]
+      ]
+    },
+    {
+      "id": "news", "kind": "lines", "title": "Since the last board",
+      "as_of": "2026-01-15T17:05:00Z", "stale_after": 86400,
+      "items": [
+        {"text": "EXMPL +4.1% on volume", "tone": "up"},
+        {"text": "SMPL -2.3% after earnings", "tone": "down"},
+        {"text": "one source failed: DEMO.X", "tone": "warn"}
+      ],
+      "empty": "nothing moved"
+    },
+    {
+      "id": "quiet", "kind": "lines", "title": "Alerts",
+      "as_of": "2026-01-15T17:05:00Z",
+      "items": [],
+      "empty": "nothing moved"
+    },
+    {
+      "id": "future", "kind": "heatmap", "title": "A kind this version does not know",
+      "as_of": "2026-01-15T17:05:00Z"
+    }
+  ]
+}

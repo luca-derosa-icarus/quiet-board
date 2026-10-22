@@ -1,0 +1,229 @@
+/* Quiet Board. Every colour and font comes from Obsidian's CSS variables. */
+
+.qb-board {
+	padding: var(--size-4-4) var(--size-4-6);
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+.qb-body.qb-dimmed {
+	opacity: 0.55;
+}
+
+.qb-error {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	padding: var(--size-4-2) 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: var(--size-4-3);
+}
+
+.qb-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-4);
+}
+
+.qb-title {
+	margin: 0;
+	font-weight: var(--font-semibold);
+}
+
+.qb-written,
+.qb-stale-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	font-variant-numeric: tabular-nums;
+}
+
+.qb-stale-note {
+	margin: calc(-1 * var(--size-4-2)) 0 var(--size-4-4);
+}
+
+.qb-block {
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: var(--size-4-3) var(--size-4-4);
+	margin-bottom: var(--size-4-4);
+}
+
+.qb-block-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-3);
+}
+
+.qb-block-title {
+	color: var(--text-normal);
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-semibold);
+}
+
+.qb-chip {
+	flex: none;
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.qb-chip-fog {
+	color: var(--text-muted);
+}
+
+.qb-muted,
+.qb-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+/* Cards */
+
+.qb-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: var(--size-4-3);
+}
+
+.qb-card {
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-3);
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-1);
+}
+
+.qb-card-top {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+}
+
+.qb-label {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.qb-value {
+	color: var(--text-normal);
+	font-size: 1.35em;
+	font-weight: var(--font-semibold);
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+.qb-delta {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+.qb-card-note {
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	text-align: right;
+}
+
+/* Lines */
+
+.qb-lines {
+	display: flex;
+	flex-direction: column;
+}
+
+.qb-line {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--size-4-3);
+	padding: var(--size-4-1) 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.qb-line:first-child {
+	border-top: none;
+}
+
+.qb-line-text {
+	color: var(--text-normal);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Spark */
+
+.qb-spark {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-4);
+}
+
+.qb-spark-line-holder {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.qb-sparkline {
+	display: block;
+	width: 100%;
+	height: 32px;
+}
+
+.qb-sparkline polyline {
+	fill: none;
+	stroke: var(--text-muted);
+	stroke-width: 1.5;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.qb-sparkline-fog polyline {
+	stroke: var(--text-faint);
+}
+
+.qb-spark-side {
+	flex: none;
+	min-width: 9em;
+}
+
+/* Tone: colour only on the figure that carries it. Fog wins over tone. */
+
+.qb-tone-up {
+	color: var(--color-green);
+}
+
+.qb-tone-down {
+	color: var(--color-red);
+}
+
+.qb-tone-warn {
+	color: var(--color-orange);
+}
+
+.qb-tone-muted {
+	color: var(--text-faint);
+}
+
+.qb-fog {
+	color: var(--text-faint);
+}
+
+@media (max-width: 600px) {
+	.qb-board {
+		padding: var(--size-4-3);
+	}
+
+	.qb-spark {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}

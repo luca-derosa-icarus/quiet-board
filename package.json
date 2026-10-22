@@ -1,0 +1,26 @@
+{
+  "name": "quiet-board",
+  "version": "0.1.0",
+  "description": "An Obsidian plugin that draws a read-only dashboard from a .board JSON file written by an outside script.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "install-vault": "node scripts/install-vault.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "dashboard"
+  ],
+  "author": "Icarus",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "typescript": "^7.0.2"
+  }
+}
