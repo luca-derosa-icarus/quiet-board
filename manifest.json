@@ -1,7 +1,7 @@
 {
   "id": "quiet-board",
   "name": "Quiet Board",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.4.0",
   "description": "Draws a calm, read-only dashboard from a .board JSON file that an outside script writes.",
   "author": "Icarus",

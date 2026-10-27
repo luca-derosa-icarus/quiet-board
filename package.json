@@ -1,6 +1,6 @@
 {
   "name": "quiet-board",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An Obsidian plugin that draws a read-only dashboard from a .board JSON file written by an outside script.",
   "main": "main.js",
   "type": "module",
