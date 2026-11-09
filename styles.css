@@ -224,11 +224,19 @@
 	font-weight: var(--font-semibold);
 }
 
+/* Every bar gets the same track: label, side and chip are fixed widths, so a long note wraps instead of
+   shrinking its bar (Luca 2026-11-09: "it loses the idea that they all have the same scale"). */
 .qb-range-bar {
 	position: relative;
-	flex: 1 1 auto;
+	flex: 1 1 0;
 	min-width: 6em;
 	height: 18px;
+}
+
+.qb-range > .qb-chip {
+	flex: none;
+	width: 6em;
+	text-align: right;
 }
 
 .qb-range-track {
@@ -291,9 +299,10 @@
 
 .qb-range-side {
 	flex: none;
-	min-width: 7em;
+	width: 16em;
 	text-align: right;
 	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
 }
 
 .qb-range-value {
