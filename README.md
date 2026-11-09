@@ -65,7 +65,7 @@ A `.board` file is UTF-8 JSON. Write it atomically (write a temporary file, then
 - `cards`: `items` of `{label, value, note?, delta?, as_of?, stale_after?, tone?}`.
 - `lines`: `items` of `{text, tone?, as_of?, stale_after?}`, plus optional `empty`, the text shown when `items` is empty.
 - `spark`: `points` (array of `[ISO time, number]`, oldest first, up to about 60), `value`, `delta?`, `tone?`. Only the newest 500 points are kept; the rest are ignored.
-- `range`: `items` of `{label, pos, mark?, value?, note?, tone?, as_of?, stale_after?}`, plus optional `edge` (the share of the bar shaded at each end, 0 to 0.5, default 0), `legend` (one muted line under the bars) and `empty`. `pos` and `mark` are numbers from 0 (left) to 1 (right), clamped to that span; the writer computes them. The tone colours the dot and the value. An item whose `pos` is missing or not a number draws no dot and says `no position`.
+- `range`: `items` of `{label, pos, mark?, value?, note?, tone?, as_of?, stale_after?}`, plus optional `edge` (the share of the bar shaded at each end, 0 to 0.5, default 0), `legend` (one muted line under the bars) and `empty`. `pos` and `mark` are numbers from 0 (left) to 1 (right), clamped to that span; the writer computes them. The tone colours the dot and the value. An item whose `pos` is missing or not a number draws no dot and says `no position`. A range row shows its own age chip only when the item carries its own `as_of` or `stale_after`; otherwise the block's chip speaks for it (fog still greys the row).
 
 ### Tone and freshness
 

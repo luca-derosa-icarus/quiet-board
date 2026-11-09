@@ -235,7 +235,7 @@
 
 .qb-range > .qb-chip {
 	flex: none;
-	width: 6em;
+	width: 5em;
 	text-align: right;
 }
 
@@ -299,7 +299,7 @@
 
 .qb-range-side {
 	flex: none;
-	width: 16em;
+	width: 11em;
 	text-align: right;
 	font-variant-numeric: tabular-nums;
 	overflow-wrap: anywhere;

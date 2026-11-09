@@ -228,7 +228,9 @@ export class BoardView extends FileView {
 			const value = item.pos === null ? "no position" : item.value ?? "";
 			side.createDiv({ cls: figureClasses("qb-range-value", item.pos === null ? "warn" : item.tone, f), text: value });
 			if (item.note) side.createDiv({ cls: "qb-range-note", text: item.note });
-			chip(row, f);
+			// The block's chip already gives the age; a row repeats it only when it carries its own stamp, so the
+			// bars get the width (Luca 2026-11-09: "maximize the amount of bar that I see").
+			if (item.as_of !== undefined || item.stale_after !== undefined) chip(row, f);
 		}
 		if (block.legend) section.createDiv({ cls: "qb-range-legend", text: block.legend });
 	}
