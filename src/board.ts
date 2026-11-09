@@ -26,6 +26,17 @@ export interface LineItem extends Stamp {
 	tone: Tone;
 }
 
+export interface RangeItem extends Stamp {
+	label: string;
+	/** Where the dot sits on the bar, 0 (left) to 1 (right); null when the file gave no usable number. */
+	pos: number | null;
+	/** An optional tick on the same bar, 0 to 1. */
+	mark?: number;
+	value?: string;
+	note?: string;
+	tone: Tone;
+}
+
 interface BlockBase {
 	id: string;
 	title: string;
@@ -52,6 +63,15 @@ export interface SparkBlock extends BlockBase {
 	points: [number, number][]; // [epoch ms, value], oldest first
 }
 
+export interface RangeBlock extends BlockBase {
+	kind: "range";
+	items: RangeItem[];
+	/** Shade this share of the bar at each end, 0 to 0.5. */
+	edge: number;
+	legend?: string;
+	empty?: string;
+}
+
 /** A block that could not be drawn: unknown kind or a format error. */
 export interface NoteBlock {
 	kind: "note";
@@ -60,7 +80,7 @@ export interface NoteBlock {
 	message: string;
 }
 
-export type Block = CardsBlock | LinesBlock | SparkBlock | NoteBlock;
+export type Block = CardsBlock | LinesBlock | SparkBlock | RangeBlock | NoteBlock;
 
 export interface Board {
 	spec: string;
@@ -86,6 +106,11 @@ function str(v: unknown): string | undefined {
 
 function seconds(v: unknown): number | undefined {
 	return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : undefined;
+}
+
+/** A finite number clamped to [lo, hi]; undefined for anything else. */
+function unit(v: unknown, lo = 0, hi = 1): number | undefined {
+	return typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : undefined;
 }
 
 function tone(v: unknown): Tone {
@@ -134,7 +159,7 @@ function normalizeBlock(b: unknown, index: number): Block {
 	const id = str(b.id) ?? `#${index + 1}`;
 	const title = str(b.title) ?? "";
 	const kind = b.kind;
-	if (kind !== "cards" && kind !== "lines" && kind !== "spark") {
+	if (kind !== "cards" && kind !== "lines" && kind !== "spark" && kind !== "range") {
 		return { kind: "note", id, title, message: "unknown block kind" };
 	}
 	const asOf = str(b.as_of);
@@ -166,6 +191,25 @@ function normalizeBlock(b: unknown, index: number): Block {
 				as_of: str(it.as_of),
 				stale_after: seconds(it.stale_after),
 			})),
+			empty: str(b.empty),
+		};
+	}
+	if (kind === "range") {
+		return {
+			...base,
+			kind,
+			items: items.map((it) => ({
+				label: str(it.label) ?? "",
+				pos: unit(it.pos) ?? null,
+				mark: unit(it.mark),
+				value: str(it.value),
+				note: str(it.note),
+				tone: tone(it.tone),
+				as_of: str(it.as_of),
+				stale_after: seconds(it.stale_after),
+			})),
+			edge: unit(b.edge, 0, 0.5) ?? 0,
+			legend: str(b.legend),
 			empty: str(b.empty),
 		};
 	}

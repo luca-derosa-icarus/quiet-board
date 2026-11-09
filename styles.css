@@ -198,6 +198,119 @@
 	min-width: 9em;
 }
 
+/* Range: one bar per item, a dot for the value, an optional tick, shaded ends. */
+
+.qb-ranges {
+	display: flex;
+	flex-direction: column;
+}
+
+.qb-range {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-3);
+	padding: var(--size-4-1) 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.qb-range:first-child {
+	border-top: none;
+}
+
+.qb-range-label {
+	flex: none;
+	width: 5em;
+	color: var(--text-normal);
+	font-weight: var(--font-semibold);
+}
+
+.qb-range-bar {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 6em;
+	height: 18px;
+}
+
+.qb-range-track {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 8px;
+	height: 2px;
+	background-color: var(--background-modifier-border);
+}
+
+.qb-range-edge {
+	position: absolute;
+	top: 7px;
+	height: 4px;
+	background-color: var(--color-orange);
+	opacity: 0.3;
+}
+
+.qb-range-mark {
+	position: absolute;
+	top: 2px;
+	width: 2px;
+	height: 14px;
+	margin-left: -1px;
+	background-color: var(--text-muted);
+}
+
+.qb-range-dot {
+	position: absolute;
+	top: 3px;
+	width: 12px;
+	height: 12px;
+	margin-left: -6px;
+	border-radius: 50%;
+	background-color: var(--text-normal);
+}
+
+.qb-range-dot-up {
+	background-color: var(--color-green);
+}
+
+.qb-range-dot-down {
+	background-color: var(--color-red);
+}
+
+.qb-range-dot-warn {
+	background-color: var(--color-orange);
+}
+
+.qb-range-dot-muted {
+	background-color: var(--text-muted);
+}
+
+.qb-range-dot-fog,
+.qb-range-mark-fog,
+.qb-range-edge-fog {
+	background-color: var(--text-faint);
+}
+
+.qb-range-side {
+	flex: none;
+	min-width: 7em;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.qb-range-value {
+	color: var(--text-normal);
+}
+
+.qb-range-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.qb-range-legend {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	margin-top: var(--size-4-2);
+}
+
 /* Tone: colour only on the figure that carries it. Fog wins over tone. */
 
 .qb-tone-up {

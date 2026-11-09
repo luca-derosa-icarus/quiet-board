@@ -224,6 +224,36 @@ test("spark points keep only well-formed pairs", () => {
 	assert.deepEqual(r.board.blocks[0].points.map((p) => p[1]), [1, 4]);
 });
 
+test("range items clamp to the bar, and an unusable position becomes null", () => {
+	const r = parseBoard(
+		board([
+			{
+				id: "z", kind: "range", title: "Z", as_of: "2026-01-10", edge: 0.9, legend: "dot today",
+				items: [
+					{ label: "A", pos: 0.25, mark: 0.6, value: "25%", note: "x", tone: "warn" },
+					{ label: "B", pos: 1.4, mark: -2 },
+					{ label: "C", pos: "half", mark: "no" },
+					{ label: "D", pos: NaN },
+				],
+			},
+		]),
+	);
+	assert.equal(r.ok, true);
+	const b = r.board.blocks[0];
+	assert.equal(b.kind, "range");
+	assert.equal(b.edge, 0.5);
+	assert.equal(b.legend, "dot today");
+	assert.deepEqual(b.items.map((i) => [i.pos, i.mark]), [[0.25, 0.6], [1, 0], [null, undefined], [null, undefined]]);
+	assert.equal(b.items[0].tone, "warn");
+	assert.equal(b.items[1].tone, "neutral");
+});
+
+test("a range block with no edge draws no shaded ends", () => {
+	const r = parseBoard(board([{ id: "z", kind: "range", title: "Z", as_of: "2026-01-10", items: [] }]));
+	assert.equal(r.board.blocks[0].edge, 0);
+	assert.equal(r.board.blocks[0].items.length, 0);
+});
+
 test("an unknown tone falls back to neutral and an invalid tz to the machine zone", () => {
 	const r = parseBoard(
 		board([{ id: "a", kind: "lines", title: "A", as_of: "2026-01-10", items: [{ text: "x", tone: "purple" }] }], {

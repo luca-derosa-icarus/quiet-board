@@ -9,7 +9,7 @@ Desktop only.
 ## What it shows
 
 - A header with the board's title and when it was written (`written 19:12 · 2 h ago`), in the board's time zone.
-- Blocks of three kinds: `cards` (labelled figures in a responsive grid), `lines` (short text rows), and `spark` (a wide, thin line of recent values with the latest value beside it).
+- Blocks of four kinds: `cards` (labelled figures in a responsive grid), `lines` (short text rows), `spark` (a wide, thin line of recent values with the latest value beside it), and `range` (one bar per item: a dot for where the value sits between a low and a high, an optional tick, shaded ends).
 - An age chip on every block and item. Anything older than its `stale_after` is fogged: drawn grey, without its colour, with a chip like `unknown · 3 h`. Old numbers stop looking like news.
 - Colour only on the figure that carries a tone: green for up, red for down, orange for warn. No colour on panels.
 - If the file can't be read (half written, broken), the plugin keeps the last good board, fogs all of it, and says so in one line.
@@ -57,7 +57,7 @@ A `.board` file is UTF-8 JSON. Write it atomically (write a temporary file, then
 | Field | Required | Meaning |
 |---|---|---|
 | `id` | yes | Unique string. |
-| `kind` | yes | `cards`, `lines` or `spark`. An unknown kind is drawn as a one-line note, never a crash. |
+| `kind` | yes | `cards`, `lines`, `spark` or `range`. An unknown kind is drawn as a one-line note, never a crash. |
 | `title` | no | Block heading. |
 | `as_of` | yes | ISO time with a zone, or a `YYYY-MM-DD` date. A block without it is shown as a format-error note. |
 | `stale_after` | no | Seconds. Absent means never stale. |
@@ -65,6 +65,7 @@ A `.board` file is UTF-8 JSON. Write it atomically (write a temporary file, then
 - `cards`: `items` of `{label, value, note?, delta?, as_of?, stale_after?, tone?}`.
 - `lines`: `items` of `{text, tone?, as_of?, stale_after?}`, plus optional `empty`, the text shown when `items` is empty.
 - `spark`: `points` (array of `[ISO time, number]`, oldest first, up to about 60), `value`, `delta?`, `tone?`. Only the newest 500 points are kept; the rest are ignored.
+- `range`: `items` of `{label, pos, mark?, value?, note?, tone?, as_of?, stale_after?}`, plus optional `edge` (the share of the bar shaded at each end, 0 to 0.5, default 0), `legend` (one muted line under the bars) and `empty`. `pos` and `mark` are numbers from 0 (left) to 1 (right), clamped to that span; the writer computes them. The tone colours the dot and the value. An item whose `pos` is missing or not a number draws no dot and says `no position`.
 
 ### Tone and freshness
 

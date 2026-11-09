@@ -44,6 +44,16 @@
       "empty": "nothing moved"
     },
     {
+      "id": "zones", "kind": "range", "title": "Where each line sits in its range",
+      "as_of": "2026-01-15T17:05:00Z", "stale_after": 86400, "edge": 0.15,
+      "legend": "dot: last close · tick: average cost · shaded: outer 15% of the range",
+      "items": [
+        {"label": "EXMPL", "pos": 0.06, "mark": 0.58, "value": "6%", "note": "RSI 31 · 28", "tone": "warn"},
+        {"label": "SAMPL", "pos": 0.47, "mark": 0.35, "value": "47%", "note": "RSI 55 · 52"},
+        {"label": "DEMO", "pos": null, "value": "", "note": "no price history"}
+      ]
+    },
+    {
       "id": "future", "kind": "heatmap", "title": "A kind this version does not know",
       "as_of": "2026-01-15T17:05:00Z"
     }

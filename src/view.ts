@@ -5,6 +5,7 @@ import {
 	CardsBlock,
 	Freshness,
 	LinesBlock,
+	RangeBlock,
 	SparkBlock,
 	Tone,
 	blockIdClass,
@@ -161,6 +162,7 @@ export class BoardView extends FileView {
 
 		if (block.kind === "cards") this.drawCards(section, block, board, now, forceFog);
 		else if (block.kind === "lines") this.drawLines(section, block, board, now, forceFog);
+		else if (block.kind === "range") this.drawRange(section, block, board, now, forceFog);
 		else this.drawSpark(section, block, bf);
 	}
 
@@ -194,6 +196,41 @@ export class BoardView extends FileView {
 			row.createDiv({ cls: figureClasses("qb-line-text", item.tone, f), text: item.text });
 			chip(row, f);
 		}
+	}
+
+	private drawRange(section: HTMLElement, block: RangeBlock, board: Board, now: number, forceFog: boolean): void {
+		if (block.items.length === 0) {
+			section.createDiv({ cls: "qb-muted", text: block.empty ?? "Nothing here." });
+			return;
+		}
+		const list = section.createDiv({ cls: "qb-ranges" });
+		const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
+		for (const item of block.items) {
+			const f = freshness(item, block, board.tz, now, forceFog);
+			const row = list.createDiv({ cls: "qb-range" });
+			row.createDiv({ cls: "qb-range-label", text: item.label });
+			const bar = row.createDiv({ cls: "qb-range-bar" });
+			bar.createDiv({ cls: "qb-range-track" });
+			if (block.edge > 0) {
+				const edge = f.stale ? "qb-range-edge qb-range-edge-fog" : "qb-range-edge";
+				bar.createDiv({ cls: edge, attr: { style: `left: 0; width: ${pct(block.edge)}` } });
+				bar.createDiv({ cls: edge, attr: { style: `right: 0; width: ${pct(block.edge)}` } });
+			}
+			if (item.mark !== undefined) {
+				bar.createDiv({ cls: f.stale ? "qb-range-mark qb-range-mark-fog" : "qb-range-mark", attr: { style: `left: ${pct(item.mark)}` } });
+			}
+			if (item.pos !== null) {
+				const dot = item.tone === "neutral" ? "qb-range-dot" : `qb-range-dot qb-range-dot-${item.tone}`;
+				bar.createDiv({ cls: f.stale ? "qb-range-dot qb-range-dot-fog" : dot, attr: { style: `left: ${pct(item.pos)}` } });
+			}
+			const side = row.createDiv({ cls: "qb-range-side" });
+			// A row with no usable position says so instead of drawing a bare bar.
+			const value = item.pos === null ? "no position" : item.value ?? "";
+			side.createDiv({ cls: figureClasses("qb-range-value", item.pos === null ? "warn" : item.tone, f), text: value });
+			if (item.note) side.createDiv({ cls: "qb-range-note", text: item.note });
+			chip(row, f);
+		}
+		if (block.legend) section.createDiv({ cls: "qb-range-legend", text: block.legend });
 	}
 
 	private drawSpark(section: HTMLElement, block: SparkBlock, f: Freshness): void {
