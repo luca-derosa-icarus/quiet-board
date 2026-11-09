@@ -317,7 +317,7 @@
 .qb-range-legend {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
-	margin-top: var(--size-4-2);
+	margin-bottom: var(--size-4-2);
 }
 
 /* Tone: colour only on the figure that carries it. Fog wins over tone. */

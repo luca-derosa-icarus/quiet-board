@@ -203,6 +203,8 @@ export class BoardView extends FileView {
 			section.createDiv({ cls: "qb-muted", text: block.empty ?? "Nothing here." });
 			return;
 		}
+		// The legend sits above the bars, so it is read before them (Luca 2026-11-09).
+		if (block.legend) section.createDiv({ cls: "qb-range-legend", text: block.legend });
 		const list = section.createDiv({ cls: "qb-ranges" });
 		const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
 		for (const item of block.items) {
@@ -232,7 +234,6 @@ export class BoardView extends FileView {
 			// bars get the width (Luca 2026-11-09: "maximize the amount of bar that I see").
 			if (item.as_of !== undefined || item.stale_after !== undefined) chip(row, f);
 		}
-		if (block.legend) section.createDiv({ cls: "qb-range-legend", text: block.legend });
 	}
 
 	private drawSpark(section: HTMLElement, block: SparkBlock, f: Freshness): void {
